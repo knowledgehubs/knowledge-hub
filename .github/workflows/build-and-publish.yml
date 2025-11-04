@@ -1,81 +1,12 @@
-name: 🏗️ Build Hugo and Publish to GitHub Pages (Unified)
+- name: ⚙️ Set Git User for Commit
+        # ... (بقية الخطوة)
 
-on:
-  schedule:
-    # Schedule the job to run once daily (00:00 UTC)
-    - cron: '0 0 * * *'
-  
-  workflow_dispatch:
-    # Allows manual trigger and setting the mode
-    inputs:
-      mode:
-        description: 'SYSTEM_MODE: LIVE or TEST'
-        required: true
-        default: 'TEST'
-        type: choice
-        options:
-          - LIVE
-          - TEST
-          
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    # 💡 الحل النهائي: منح الـ Token إذن الكتابة للمحتوى
-    permissions:
-      contents: write
-      
-    # تعريف متغير البيئة الرئيسي للتحكم في سلوك Python
-    env:
-      SYSTEM_MODE: ${{ github.event.inputs.mode || 'LIVE' }} 
-      
-    steps:
-      - name: ⬇️ Checkout Repository (Full History)
-        # يجب استخدام token لتنفيذ git push لاحقًا
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }} 
-
-      - name: 🏗️ Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      - name: ⚙️ Set Git User for Commit
-        # إعداد هوية الـ Commit التي سيتم إنشاؤها بواسطة generator.py
+      - name: 📥 Ensure Ananke Theme is Available
         run: |
-          git config --global user.email "knowledgehub-bot@users.noreply.github.com"
-          git config --global user.name "Knowledge Hub Automation Bot"
-
+          # هذه الخطوة تجلب الثيم يدوياً إذا لم يتم جلبه كوحدة فرعية
+          if [ ! -d "themes/ananke" ]; then
+            git clone https://github.com/theNewDynamic/Ananke themes/ananke
+          fi
+          
       - name: 🚀 Run Generator Script
-        # يقوم بتوليد 5 مقالات، تحديث ملفات CSV، وإنشاء Git Commit محلي إذا كان LIVE
-        run: python content-engine/generator.py
-        env:
-          SYSTEM_MODE: ${{ env.SYSTEM_MODE }}
-          
-      - name: ⬆️ Push Content Commit (If New Content Generated)
-        # يدفع الـ Commit المحلي الذي أنشأه generator.py إلى الفرع البعيد (main)
-        if: env.SYSTEM_MODE == 'LIVE'
-        run: |
-          # نستخدم GITHUB_TOKEN الافتراضي لعملية الدفع الآمنة
-          git push
-
-      - name: 🛠️ Setup Hugo
-        uses: peaceiris/actions-hugo@v3
-        with:
-          hugo-version: 'latest'
-
-      - name: ⚙️ Build Hugo Site
-        run: hugo --minify
-
-      - name: 🚀 Deploy to GitHub Pages
-        # إذا كان الدفع ناجحاً (أو في وضع الاختبار)، يتم النشر
-        uses: peaceiris/actions-gh-pages@v4
-        if: success() 
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          publish_branch: gh-pages
-          cname: ''
+        # ... (بقية الخطوة)
