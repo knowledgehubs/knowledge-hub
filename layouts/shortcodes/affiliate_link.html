@@ -1,0 +1,10 @@
+{{ $key := .Get "key" }}
+{{ $text := .Get "text" | default "Visit Our Recommended Partner" }}
+{{ $redirects := .Site.Data.redirects }}
+{{ $linkData := index $redirects $key | default (index $redirects "DEFAULT") }}
+
+{{ with $linkData.url }}
+<a href="{{ . }}" target="_blank" rel="nofollow noopener" title="{{ $linkData.description | default $text }}">{{ $text }}</a>
+{{ else }}
+<span>[Affiliate Link Missing: {{ $key }}]</span>
+{{ end }}
