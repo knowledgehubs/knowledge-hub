@@ -11,8 +11,8 @@ PROCESSED_CSV_FILE = 'content-engine/processed_keywords.csv'
 
 # Paths
 BLOCKS_DIR = 'blocks/'
-# Note: This path is relative to generator.py, going up one level (..) then into the sibling publisher content path
-PUBLISHER_CONTENT_DIR = '../knowledge-hub/content/posts/' 
+# 💡 التعديل هنا: المسار الآن داخلي مباشرة
+PUBLISHER_CONTENT_DIR = 'content/posts/' 
 
 # Publishing Settings
 NUM_POSTS_TO_GENERATE = 5 # Number of articles to generate and push per run
@@ -45,9 +45,9 @@ def load_blocks():
             with open(os.path.join(BLOCKS_DIR, filename), 'r', encoding='utf-8') as f:
                 blocks[key] = [line.strip() for line in f if line.strip()]
         except FileNotFoundError:
-             print(f"⚠️ Block file not found: {filename}")
-             # Placeholder ensures the script doesn't crash if files are empty/missing
-             blocks[key] = ['[Placeholder block content - please fill this file]'] 
+            print(f"⚠️ Block file not found: {filename}")
+            # Placeholder ensures the script doesn't crash if files are empty/missing
+            blocks[key] = ['[Placeholder block content - please fill this file]'] 
     return blocks
 
 def load_keywords():
@@ -223,15 +223,17 @@ canonical: "/posts/{slug}/"
 
 def execute_git_push(commit_message):
     """Executes the Git Commit operation (The Action handles the Push)."""
+    # 💡 التعديل هنا: نحن الآن في content-engine/، يجب أن نعود مرة واحدة إلى جذر المستودع
     os.chdir(os.path.abspath(os.path.dirname(__file__)))
-    os.chdir('..') # Move to the factory root
+    os.chdir('..') # Move to the repository root
 
     print("--- 🔄 Starting Git operations... ---")
     
     # 1. Add Files
-    # Add files inside content-engine/ (CSV files) and new posts inside the relative publisher path
+    # 💡 التعديل هنا: إضافة مجلد blocks/ (الذي أصبح في الجذر)
+    os.system('git add blocks/')
     os.system('git add content-engine/') 
-    os.system(f'git add {PUBLISHER_CONTENT_DIR.replace("../", "")}') 
+    os.system(f'git add {PUBLISHER_CONTENT_DIR}') # 'content/posts/'
 
     # 2. Commit
     commit_command = f'git commit -m "{commit_message}"'
@@ -287,6 +289,7 @@ if __name__ == "__main__":
     if processed_count > 0 and SYSTEM_MODE == 'LIVE':
         commit_msg = f"AUTO: Publish {processed_count} new articles on {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         execute_git_push(commit_msg)
-        print("🚀 Script finished. The Workflow Action will now execute the secure push.")
+        # 💡 تم إزالة أمر Push الخارجي. الآن يعتمد على الـ Workflow الموحد.
+        print("🚀 Script finished. The Workflow Action will now continue the build.")
     elif SYSTEM_MODE == 'LIVE':
-         print("✅ Nothing new to commit or push.")
+        print("✅ Nothing new to commit or push.")
