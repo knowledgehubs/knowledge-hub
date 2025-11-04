@@ -2,16 +2,16 @@ name: 🏗️ Build Hugo and Publish to GitHub Pages (Unified)
 
 on:
   schedule:
-    # Schedule the job to run once daily (00:00 UTC)
-    - cron: '0 0 * * *'
+    # 💡 الجدولة التلقائية: يعمل يومياً في الساعة 03:00 صباحاً بتوقيت UTC
+    - cron: '0 3 * * *'
   
   workflow_dispatch:
-    # Allows manual trigger and setting the mode
+    # يسمح بالتشغيل اليدوي وتحديد الوضع
     inputs:
       mode:
         description: 'SYSTEM_MODE: LIVE or TEST'
         required: true
-        default: 'TEST'
+        default: 'LIVE'
         type: choice
         options:
           - LIVE
@@ -26,18 +26,20 @@ jobs:
       contents: write
       
     env:
+      # 💡 تغيير الوضع الافتراضي للتشغيل التلقائي إلى LIVE
       SYSTEM_MODE: ${{ github.event.inputs.mode || 'LIVE' }} 
       
     steps:
-      - name: ⬇️ Checkout Repository (Full History & Submodules)
-        # Token ضروري لجلب الـ Submodules وإجراء الـ Push
+      - name: ⬇️ Checkout Repository (Full History)
+        # Token ضروري لجلب القوالب وإجراء الـ Push
         uses: actions/checkout@v4
         with:
-          submodules: true # 💡 هذا يجب أن يعمل الآن بعد الإصلاح اليدوي
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }} 
-
-      # ❌ تم حذف خطوة "Ensure Ananke Theme is Available" لتجنب خطأ المصادقة
+          
+      # 💡 الخطوة الجديدة: جلب قالب PaperMod كملف عادي (أفضل من submodule)
+      - name: ⬇️ Clone Theme PaperMod
+        run: git clone https://github.com/adityatelange/hugo-PaperMod.git themes/PaperMod
 
       - name: 🏗️ Setup Python
         uses: actions/setup-python@v5
@@ -65,12 +67,12 @@ jobs:
           hugo-version: 'latest'
 
       - name: ⚙️ Build Hugo Site
-        # هذه الخطوة يجب أن تعمل الآن بعد أن جلبت خطوة الـ Checkout القالب
+        # هذه الخطوة الآن ستستخدم القالب الجديد PaperMod
         run: hugo --minify
 
       - name: 🚀 Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
-        if: success() 
+        if: success()  
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
