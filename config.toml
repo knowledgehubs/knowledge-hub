@@ -1,0 +1,19 @@
+baseURL = "https://knowledgehubs.github.io/knowledge-hub/"
+languageCode = "en-us"
+title = "Knowledge Hub"
+theme = "ananke" # Default simple theme - ensure this theme is available or change it
+paginate = 10
+enableRobotsTXT = true
+
+[params]
+  # Basic site parameters
+  description = "A comprehensive network of automatically generated high-quality content."
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true # Allows rendering raw HTML like JSON-LD and shortcodes
