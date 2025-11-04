@@ -1,20 +1,28 @@
 baseURL = "https://knowledgehubs.github.io/knowledge-hub/"
 languageCode = "en-us"
 title = "Knowledge Hub"
-#theme = "ananke" # Default simple theme - ensure this theme is available or change it
+#theme = "ananke" # مُعلَّق: تم تعليق هذا السطر لتجنب خطأ القالب المفقود
+
+# إعدادات الـ Pagination (لحل تحذيرات Hugo)
 [pagination]
   pagerSize = 10
+  
+# إعدادات الـ Robot (هام لـ SEO)
 enableRobotsTXT = true
 
 [params]
   # Basic site parameters
   description = "A comprehensive network of automatically generated high-quality content."
+  # تحديد عدد المقالات على الصفحة الرئيسية (Home Page)
+  mainSections = ["posts"]
+  paginate = 10
 
 [taxonomies]
   tag = "tags"
   category = "categories"
 
+# إعدادات الـ Markdown لتمكين قصاصات Hugo (Shortcodes) و JSON-LD
 [markup]
   [markup.goldmark]
     [markup.goldmark.renderer]
-      unsafe = true # Allows rendering raw HTML like JSON-LD and shortcodes
+      unsafe = true # يسمح بعرض أكواد HTML خام مثل JSON-LD و Shortcodes
