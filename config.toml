@@ -2,7 +2,8 @@ baseURL = "https://knowledgehubs.github.io/knowledge-hub/"
 languageCode = "en-us"
 title = "Knowledge Hub"
 theme = "ananke" # Default simple theme - ensure this theme is available or change it
-paginate = 10
+[pagination]
+  pagerSize = 10
 enableRobotsTXT = true
 
 [params]
