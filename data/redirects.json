@@ -1,0 +1,14 @@
+{
+  "OFFER_100": {
+    "url": "https://example.com/affiliate-offer-A?tag=kh-100",
+    "description": "Premium SEO Tool Subscription"
+  },
+  "OFFER_999": {
+    "url": "https://another-example.com/best-hosting-plan?ref=kh-999",
+    "description": "High-Speed Web Hosting Service"
+  },
+  "DEFAULT": {
+    "url": "https://knowledgehubs.github.io/knowledge-hub/default-cta-page",
+    "description": "General Product Recommendation"
+  }
+}
