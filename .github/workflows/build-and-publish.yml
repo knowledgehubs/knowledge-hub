@@ -1,0 +1,35 @@
+name: 🏗️ Build Hugo and Publish to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # Trigger when new content is pushed to the main branch
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true  # Necessary if you use a Hugo Theme submodule
+          fetch-depth: 0    # Get full history
+
+      - name: 🛠️ Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: 'latest' 
+          # Ensure theme is installed if not using the 'ananke' default fully
+          
+      - name: ⚙️ Build Hugo Site
+        run: hugo --minify
+
+      - name: 🚀 Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: github.ref == 'refs/heads/main' 
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # Uses the default GITHUB_TOKEN for publishing
+          publish_dir: ./public
+          publish_branch: gh-pages # Publish to the gh-pages branch
+          cname: '' # Leave blank unless you plan to use a custom domain
