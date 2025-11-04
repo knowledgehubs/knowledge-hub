@@ -1,7 +1,8 @@
 baseURL = "https://knowledgehubs.github.io/knowledge-hub/"
 languageCode = "en-us"
 title = "Knowledge Hub"
-#theme = "ananke" # مُعلَّق: تم تعليق هذا السطر لتجنب خطأ القالب المفقود
+# 💡 تحديد القالب الجديد (مهم جداً!)
+theme = "PaperMod" 
 
 # إعدادات الـ Pagination (لحل تحذيرات Hugo)
 [pagination]
@@ -10,12 +11,38 @@ title = "Knowledge Hub"
 # إعدادات الـ Robot (هام لـ SEO)
 enableRobotsTXT = true
 
+# ===============================================
+# 💡 إعدادات PaperMod الإضافية (للمظهر والقائمة)
+# ===============================================
+
 [params]
   # Basic site parameters
   description = "A comprehensive network of automatically generated high-quality content."
   # تحديد عدد المقالات على الصفحة الرئيسية (Home Page)
   mainSections = ["posts"]
   paginate = 10
+  
+  # إعدادات PaperMod
+  defaultTheme = "auto" # وضع داكن أو فاتح تلقائي
+  disableThemeToggle = false
+  ShowReadingTime = true
+  ShowShareButtons = false
+  ShowPostNavHeaders = true
+  ShowBreadCrumbs = true
+
+# إعدادات القائمة الرئيسية (Main Menu)
+[[menu.main]]
+  name = "Home"
+  url = "/"
+  weight = 10
+[[menu.main]]
+  name = "Articles"
+  url = "/posts" # هذا هو المسار الذي تم توليد المقالات فيه
+  weight = 20
+[[menu.main]]
+  name = "About"
+  url = "/about" # يمكنك إضافة صفحة /about لاحقاً
+  weight = 30
 
 [taxonomies]
   tag = "tags"
