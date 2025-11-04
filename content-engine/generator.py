@@ -11,7 +11,7 @@ PROCESSED_CSV_FILE = 'content-engine/processed_keywords.csv'
 
 # Paths
 BLOCKS_DIR = 'blocks/'
-# 💡 التعديل هنا: المسار الآن داخلي مباشرة
+# 💡 المسار داخلي مباشرة من جذر المستودع
 PUBLISHER_CONTENT_DIR = 'content/posts/' 
 
 # Publishing Settings
@@ -38,25 +38,41 @@ HUMAN_SIGNATURE = "\n---\n\n*Editor's Note: This guide was constructed by the Kn
 # --- 2. CORE FUNCTIONS ---
 
 def load_blocks():
-    """Loads all blocks from text files."""
+    """Loads all blocks from text files, using an absolute path relative to this script."""
+    
+    # 💡 المسار المطلق لملف generator.py
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # 💡 تحديد المسار الفعلي لـ blocks/ (التي هي في المجلد الأب لـ content-engine/)
+    base_blocks_dir = os.path.join(script_dir, '..', BLOCKS_DIR) 
+
     blocks = {}
     for key, filename in BLOCK_FILES.items():
         try:
-            with open(os.path.join(BLOCKS_DIR, filename), 'r', encoding='utf-8') as f:
+            # 💡 استخدام المسار المطلق لفتح الملف
+            filepath = os.path.join(base_blocks_dir, filename) 
+            with open(filepath, 'r', encoding='utf-8') as f:
                 blocks[key] = [line.strip() for line in f if line.strip()]
         except FileNotFoundError:
-            print(f"⚠️ Block file not found: {filename}")
+            print(f"⚠️ Block file not found at expected path: {filepath}")
             # Placeholder ensures the script doesn't crash if files are empty/missing
             blocks[key] = ['[Placeholder block content - please fill this file]'] 
+            
     return blocks
 
 def load_keywords():
     """Loads keywords from the main CSV file."""
+    # 💡 يجب أيضًا تعديل مسار CSV لضمان قراءته بشكل صحيح
+    
+    # تحديد المسار المطلق لملف CSV
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    input_csv_path = os.path.join(script_dir, '..', INPUT_CSV_FILE) # المسار المطلق 
+    
     keywords_list = []
-    if not os.path.exists(INPUT_CSV_FILE) or os.path.getsize(INPUT_CSV_FILE) == 0:
+    if not os.path.exists(input_csv_path) or os.path.getsize(input_csv_path) == 0:
         return []
 
-    with open(INPUT_CSV_FILE, mode='r', newline='', encoding='utf-8') as file:
+    with open(input_csv_path, mode='r', newline='', encoding='utf-8') as file:
         reader = csv.DictReader(file)
         for row in reader:
             if 'keyword' in row and 'title' in row:
@@ -66,21 +82,25 @@ def load_keywords():
 def update_keywords_csv(remaining_keywords, processed_keywords):
     """Updates the CSV files, moving processed keywords to a dedicated file."""
     
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    input_csv_path = os.path.join(script_dir, '..', INPUT_CSV_FILE)
+    processed_csv_path = os.path.join(script_dir, '..', PROCESSED_CSV_FILE)
+    
     # Write the remaining (unprocessed) keywords back to the input file
     if remaining_keywords:
         fieldnames = ['keyword', 'title']
-        with open(INPUT_CSV_FILE, mode='w', newline='', encoding='utf-8') as file:
+        with open(input_csv_path, mode='w', newline='', encoding='utf-8') as file:
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(remaining_keywords)
-    elif os.path.exists(INPUT_CSV_FILE):
-        os.remove(INPUT_CSV_FILE)
+    elif os.path.exists(input_csv_path):
+        os.remove(input_csv_path)
 
     # Load previously processed data
     previous_processed = []
-    if os.path.exists(PROCESSED_CSV_FILE) and os.path.getsize(PROCESSED_CSV_FILE) > 0:
+    if os.path.exists(processed_csv_path) and os.path.getsize(processed_csv_path) > 0:
         try:
-            with open(PROCESSED_CSV_FILE, mode='r', newline='', encoding='utf-8') as file:
+            with open(processed_csv_path, mode='r', newline='', encoding='utf-8') as file:
                 reader = csv.DictReader(file)
                 previous_processed = list(reader)
         except Exception as e:
@@ -92,7 +112,7 @@ def update_keywords_csv(remaining_keywords, processed_keywords):
     # Write the combined list to the processed file
     if all_processed:
         fieldnames = ['keyword', 'title']
-        with open(PROCESSED_CSV_FILE, mode='w', newline='', encoding='utf-8') as file:
+        with open(processed_csv_path, mode='w', newline='', encoding='utf-8') as file:
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(all_processed)
@@ -245,7 +265,10 @@ def execute_git_push(commit_message):
 
 if __name__ == "__main__":
     SYSTEM_MODE = os.environ.get('SYSTEM_MODE', 'TEST')
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    
+    # 💡 تم إزالة os.chdir(os.path.dirname(os.path.abspath(__file__))) هنا لتجنب تضارب os.chdir
+    # الآن تعتمد جميع القراءات والكتابات على المسار المطلق داخل load_blocks و load_keywords
+
     loaded_blocks = load_blocks()
     all_keywords = load_keywords()
     
