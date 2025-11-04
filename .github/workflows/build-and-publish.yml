@@ -1,35 +1,80 @@
-name: 🏗️ Build Hugo and Publish to GitHub Pages
+name: 🏗️ Build Hugo and Publish to GitHub Pages (Unified)
 
 on:
-  push:
-    branches:
-      - main # Trigger when new content is pushed to the main branch
+  schedule:
+    # Schedule the job to run once daily (00:00 UTC)
+    - cron: '0 0 * * *'
+  
   workflow_dispatch:
-
+    # Allows manual trigger and setting the mode
+    inputs:
+      mode:
+        description: 'SYSTEM_MODE: LIVE or TEST'
+        required: true
+        default: 'TEST'
+        type: choice
+        options:
+          - LIVE
+          - TEST
+          
+  # ❌ تمت إزالة 'push' على main: الآن التشغيل يعتمد على الجدولة أو الـ Dispatch فقط
+  # هذا يمنع إعادة البناء في كل مرة يتم فيها إضافة محتوى جديد
+  
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    # تعريف متغير البيئة الرئيسي للتحكم في سلوك Python
+    env:
+      SYSTEM_MODE: ${{ github.event.inputs.mode || 'LIVE' }} 
+      
     steps:
-      - name: ⬇️ Checkout Repository
+      - name: ⬇️ Checkout Repository (Full History)
+        # يجب استخدام token لتنفيذ git push لاحقًا
         uses: actions/checkout@v4
         with:
-          submodules: true  # Necessary if you use a Hugo Theme submodule
-          fetch-depth: 0    # Get full history
+          submodules: true
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }} 
+
+      - name: 🏗️ Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: ⚙️ Set Git User for Commit
+        # إعداد هوية الـ Commit التي سيتم إنشاؤها بواسطة generator.py
+        run: |
+          git config --global user.email "knowledgehub-bot@users.noreply.github.com"
+          git config --global user.name "Knowledge Hub Automation Bot"
+
+      - name: 🚀 Run Generator Script
+        # يقوم بتوليد 5 مقالات، تحديث ملفات CSV، وإنشاء Git Commit محلي إذا كان LIVE
+        run: python content-engine/generator.py
+        env:
+          SYSTEM_MODE: ${{ env.SYSTEM_MODE }}
+          
+      - name: ⬆️ Push Content Commit (If New Content Generated)
+        # يدفع الـ Commit المحلي الذي أنشأه generator.py إلى الفرع البعيد (main)
+        if: env.SYSTEM_MODE == 'LIVE'
+        run: |
+          # نستخدم GITHUB_TOKEN الافتراضي لعملية الدفع الآمنة
+          git push
 
       - name: 🛠️ Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: 'latest' 
-          # Ensure theme is installed if not using the 'ananke' default fully
-          
+          hugo-version: 'latest'
+
       - name: ⚙️ Build Hugo Site
         run: hugo --minify
 
       - name: 🚀 Deploy to GitHub Pages
+        # إذا كان الدفع ناجحاً (أو في وضع الاختبار)، يتم النشر
         uses: peaceiris/actions-gh-pages@v4
-        if: github.ref == 'refs/heads/main' 
+        if: success() 
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }} # Uses the default GITHUB_TOKEN for publishing
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
-          publish_branch: gh-pages # Publish to the gh-pages branch
-          cname: '' # Leave blank unless you plan to use a custom domain
+          publish_branch: gh-pages
+          cname: ''
