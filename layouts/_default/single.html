@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <title>{{ with .Params.description }}{{ . }}{{ else }}{{ .Title }}{{ end }} | {{ .Site.Title }}</title>
+    <meta name="description" content="{{ with .Params.description }}{{ . }}{{ else }}{{ .Title | truncate 155 }}{{ end }}">
+    <link rel="canonical" href="{{ .Params.canonical | absURL }}">
+    
+    <link rel="stylesheet" href="{{ .Site.BaseURL }}css/style.css"> 
+
+</head>
+<body>
+    <header>
+        <a href="{{ .Site.BaseURL }}"><h1>{{ .Site.Title }}</h1></a>
+    </header>
+    <main>
+        <article>
+            <h1>{{ .Title }}</h1>
+            
+            <p class="meta-data">Published: {{ .Date.Format "January 2, 2006" }}</p>
+            
+            <div class="content">
+                {{ .Content }}
+            </div>
+            
+            <hr>
+            
+        </article>
+    </main>
+    <footer>
+        <p>&copy; {{ now.Year }} Knowledge Hub.</p>
+    </footer>
+</body>
+</html>
