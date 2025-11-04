@@ -22,6 +22,9 @@ enableRobotsTXT = true
   mainSections = ["posts"]
   paginate = 10
   
+  # 🏆 كود التحقق من Google Search Console
+  google_site_verification = "74ovZZU1fP4AXZgVnj2dhMMto-HK7rL7No0LGAMcue4" 
+  
   # إعدادات PaperMod
   defaultTheme = "auto" # وضع داكن أو فاتح تلقائي
   disableThemeToggle = false
