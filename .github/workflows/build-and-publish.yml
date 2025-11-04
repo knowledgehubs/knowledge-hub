@@ -21,29 +21,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
-    # 💡 الحل النهائي: منح الـ Token إذن الكتابة للمحتوى
     permissions:
       contents: write
       
-    # تعريف متغير البيئة الرئيسي للتحكم في سلوك Python
     env:
       SYSTEM_MODE: ${{ github.event.inputs.mode || 'LIVE' }} 
       
     steps:
       - name: ⬇️ Checkout Repository (Full History)
-        # Token ضروري لجلب الـ Submodules وإجراء الـ Push لاحقًا
         uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }} 
 
-      # 💡 الحل السريع: جلب القالب يدوياً إذا لم ينجح الـ Submodule
       - name: 📥 Ensure Ananke Theme is Available
         run: |
-          # هذه الخطوة تضمن وجود الثيم لتجاوز خطأ "module not found"
+          # 💡 التصحيح هنا: استخدام GITHUB_TOKEN للوصول إلى GitHub
           if [ ! -d "themes/ananke" ]; then
-            git clone https://github.com/theNewDynamic/Ananke themes/ananke
+            git clone https://${{ secrets.GITHUB_TOKEN }}@github.com/theNewDynamic/Ananke themes/ananke
           fi
 
       - name: 🏗️ Setup Python
@@ -52,19 +48,16 @@ jobs:
           python-version: '3.x'
 
       - name: ⚙️ Set Git User for Commit
-        # إعداد هوية الـ Commit التي سيتم إنشاؤها بواسطة generator.py
         run: |
           git config --global user.email "knowledgehub-bot@users.noreply.github.com"
           git config --global user.name "Knowledge Hub Automation Bot"
 
       - name: 🚀 Run Generator Script
-        # يقوم بتوليد 5 مقالات، تحديث ملفات CSV، وإنشاء Git Commit محلي
         run: python content-engine/generator.py
         env:
           SYSTEM_MODE: ${{ env.SYSTEM_MODE }}
           
       - name: ⬆️ Push Content Commit (If New Content Generated)
-        # يدفع الـ Commit المحلي الذي أنشأه generator.py إلى الفرع البعيد (main)
         if: env.SYSTEM_MODE == 'LIVE'
         run: |
           git push
@@ -75,11 +68,9 @@ jobs:
           hugo-version: 'latest'
 
       - name: ⚙️ Build Hugo Site
-        # هذا الأمر الآن سيجد القالب بسبب الخطوة الإضافية
         run: hugo --minify
 
       - name: 🚀 Deploy to GitHub Pages
-        # إذا كان الدفع ناجحاً (أو في وضع الاختبار)، يتم النشر
         uses: peaceiris/actions-gh-pages@v4
         if: success() 
         with:
