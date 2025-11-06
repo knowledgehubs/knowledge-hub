@@ -5,7 +5,7 @@ title = "Knowledge Hub"
 theme = "PaperMod" 
 
 # 🏆 Google Analytics (الإعداد القياسي لـ Hugo)
-googleAnalytics = "G-BP6F13C7B5" # <-- ضع رمز القياس (G-XXXXXXXXX) هنا
+googleAnalytics = "G-BP6F13C7B5" # <-- رمز القياس الخاص بك
 
 # إعدادات الـ Pagination (لحل تحذيرات Hugo)
 [pagination]
@@ -13,6 +13,9 @@ googleAnalytics = "G-BP6F13C7B5" # <-- ضع رمز القياس (G-XXXXXXXXX) ه
   
 # إعدادات الـ Robot (هام لـ SEO)
 enableRobotsTXT = true
+
+# 🏆 التعديل الحاسم: هذا يضمن أن Hugo يستخدم الروابط الكاملة
+canonifyURLs = true 
 
 # ===============================================
 # 💡 إعدادات PaperMod الإضافية (للمظهر والقائمة)
